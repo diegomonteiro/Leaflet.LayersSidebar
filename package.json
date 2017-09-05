@@ -1,0 +1,11 @@
+{
+  "name": "leaflet-layers-sidebar",
+  "version": "1.0.0",
+  "description": "Plugin to control your layers with sidebar.",
+  "main": "my-plugin.js",
+  "author": "Diego Monteiro",
+  "license": "IST",
+  "peerDependencies": {
+    "leaflet": "^1.0.0"
+  }
+}
