@@ -10,8 +10,8 @@ L.Control.LayersSidebar = L.Control.extend({
     },
     layers: [],
 
-    initialize: function (innerHTML, options, layers) {
-        L.Util.setOptions(this, options, layers);
+    initialize: function (innerHTML, options, group_layers) {
+        L.Util.setOptions(this, options, group_layers);
         this._innerHTML = innerHTML;
         this._isLeftPosition = this.options.menuposition == 'topleft' || 
             this.options.menuposition == 'bottomleft' ? true : false;
@@ -81,7 +81,7 @@ L.Control.LayersSidebar = L.Control.extend({
 
         this._contents = L.DomUtil.create('div', 'leaflet-menu-contents', this._menu);
 
-        this._contents.innerHTML = this._innerHTML+this._setLayers(layers);
+        this._contents.innerHTML = this._innerHTML+this._setLayers(group_layers);
         this._contents.style.clear = 'both';
 
         if (this._isHorizontal){
@@ -122,77 +122,91 @@ L.Control.LayersSidebar = L.Control.extend({
     _setLayers: function(group_layers){
     	console.log("Grupo de Camadas: ", group_layers);
     	
-    	var contentsCategories = "<div id=\"accordion\" role=\"tablist\" style=\"\">";
-
-    	$.each(group_layers, function(name_group, group_layer){
+    	var contentsCategories = "<div id=\"accordion\" role=\"tablist\" style=\"\" aria-multiselectable=\"true\">";
+    	contentsCategories += "<div class=\"panel panel-default\">";
+    	$.each(group_layers.layers, function(name_group, group_layer){
 
     		var categoryParametized = name_group.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/(^-|-|_$)/g,'');
 
-    		contentsCategories += "<div class=\"card\">";
-			    contentsCategories += "<div class=\"card-header\" role=\"tab\" id=\"heading_"+categoryParametized+"\">";
-				    contentsCategories +=  "<h5 class=\"mb-0\">";
+    		
+			    contentsCategories += "<div class=\"panel-heading\" role=\"tab\" id=\"heading_"+categoryParametized+"\">";
+				    contentsCategories +=  "<h4 class=\"panel-title\">";
 				    contentsCategories +=    "<a data-toggle=\"collapse\" href=\"#collapse_"+categoryParametized+"\" aria-expanded=\"false\" aria-controls=\"collapse_"+categoryParametized+"\">";
 				    	contentsCategories += humanize(name_group);
 				    contentsCategories +=    "</a>";
-				    contentsCategories += "</h5>";
+				    contentsCategories += "</h4>";
 		    	contentsCategories += "</div>";
-		    contentsCategories += "<div id=\"collapse_"+categoryParametized+"\" class=\"collapse show\" role=\"tabpanel\" aria-labelledby=\"heading_"+categoryParametized+"\" data-parent=\"#accordion\">";
-			contentsCategories += "<div class=\"card-body\">";
+		    contentsCategories += "<div id=\"collapse_"+categoryParametized+"\" class=\"panel-collapse collapse out\" role=\"tabpanel\" aria-labelledby=\"heading_"+categoryParametized+"\" data-parent=\"#accordion\">";
+			contentsCategories += "<div class=\"panel-body\">";
 
 				contentsCategories += "<div id=\"accordion_layers\" role=\"tablist\" style=\"\">";
-
-	    		$.each(group_layer, function(name_layer, layer){	    		
-
-	    			$("#opacity_"+layerParametized).slider({
-
-				        formatter: function(value) {
-				            return 'Visibilidade: ' + value*100 +'%';
-				        }
-				    });
+				contentsCategories += "<div class=\"panel panel-default\">";
+	    		$.each(group_layer, function(name_layer, layer){	    	
 
 			        //contentsCategories += layer;
 			        var layerParametized = categoryParametized+"_"+name_layer.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 
-			        contentsCategories += "<div class=\"card\">";
-					    contentsCategories += "<div class=\"card-header\" data-toggle=\"collapse\" data-target=\"#collapse_"+layerParametized+"\" role=\"tab\" id=\"heading_"+layerParametized+"\">";
-						    /*contentsCategories +=  "<h6 class=\"mb-0\">";
-						    contentsCategories +=    "<a data-toggle=\"collapse\" href=\"#collapse_"+layerParametized+"\" aria-expanded=\"false\" aria-controls=\"collapse_"+layerParametized+"\">";
+			        
+					    contentsCategories += "<div class=\"panel-heading\" id=\"heading_"+layerParametized+"\">";
+						    /*contentsCategories += "<div data-toggle=\"collapse\" data-target=\"#collapse_"+layerParametized+"\" class=\"painel-title checkbox\">";
+				            //contentsCategories +=  "<h4 class=\"panel-title\">";
+						    contentsCategories += "<div class=\"btn-group btn-group-xs btn-toggle pull-left\">";
+							contentsCategories += "<button class=\"btn btn-success\"><i class=\"fa fa-check\"></i></button>";
+                        	contentsCategories += "<button class=\"btn active btn-default\"><i class=\"fa fa-close\"></i></button>";
+                    		contentsCategories += "</div>   ";
+						    contentsCategories +=    "<a data-toggle=\"collapse\" class=\"painel-title\" href=\"#collapse_"+layerParametized+"\" aria-expanded=\"false\" aria-controls=\"collapse_"+layerParametized+"\">";
 						    	contentsCategories += humanize(name_layer);
 						    contentsCategories +=    "</a>";
-						    contentsCategories += "</h6>";*/
-						    contentsCategories += "<div data-toggle=\"collapse\" data-target=\"#collapse_"+layerParametized+"\" class=\"checkbox\">";
-				            contentsCategories += "<label>";
-				                contentsCategories += "<input type=\"checkbox\"/> "+humanize(name_layer);
-				            contentsCategories += "</label>";
-				            contentsCategories += "</div>";
+						    //contentsCategories += "</h4>";
+				            contentsCategories += "</div>";*/
+
+				            contentsCategories += "<div class=\"row\">";
+					        contentsCategories +=    "<div class=\"col-xs-4 text-left\"><input type=\"checkbox\" /></div>";
+					        contentsCategories +=    "<div class=\"col-xs-4 text-center\">"+humanize(name_layer)+"</div>";
+					        contentsCategories +=    "<div class=\"col-xs-4 text-right\"><a href=\"#\" data-toggle=\"collapse\" data-target=\"#collapse_"+layerParametized+"\" role=\"tab\" ><i class=\"fa fa-cogs\"></i></a></div>";
+					        contentsCategories += "</div>";
+
 				           
 				    	contentsCategories += "</div>";
-				    contentsCategories += "<div id=\"collapse_"+layerParametized+"\" class=\"collapse show\" role=\"tabpanel\" aria-labelledby=\"heading_"+layerParametized+"\" data-parent=\"#accordion_layers\">";
-						contentsCategories += "<div class=\"card-body\">";
+				    contentsCategories += "<div id=\"collapse_"+layerParametized+"\" class=\"panel-collapse collapse out\" role=\"tabpanel\" aria-labelledby=\"heading_"+layerParametized+"\" data-parent=\"#accordion_layers\">";
+						contentsCategories += "<div class=\"panel-body\">";
+						contentsCategories += parseMetadata(layer.metadata);
+						contentsCategories += "</div>"; //end of panel body
+						contentsCategories += "<table class=\"table table-bordered table-condensed\">";
+							contentsCategories += "<thead><th colspan=\"3\">Estilos</th></thead>";
+							contentsCategories += "<tr>";
+								contentsCategories += "<td style=\"width: 5px\">";
+								contentsCategories += "<i class=\"fa fa-eye-slash\"></i>";
+								contentsCategories += "</td>";
+								contentsCategories += "<td>";
+								contentsCategories += "<input type=\"text\" id=\"opacity_"+layerParametized+"\" name=\"opacity_"+layerParametized+"\"";
+								contentsCategories += "data-provide=\"slider\"";
+								contentsCategories += "data-slider-min=\"0\"";
+								contentsCategories += "data-slider-max=\"1\"";
+								contentsCategories += "data-slider-step=\"0.1\"";
+								contentsCategories += "data-slider-value=\"1\"";
+								contentsCategories += "data-slider-tooltip=\"show\" />";
+								contentsCategories += "</td>";
+								contentsCategories += "<td style=\"width: 5px\">";
+								contentsCategories += "<i class=\"fa fa-eye\"></i>";
+								contentsCategories += "</td>";
+							contentsCategories += "</tr>";
+							
+
+						contentsCategories += "</table>";
 						
-						contentsCategories += "<i class=\"fa fa-eye-slash\"></i>";
-						contentsCategories += "<input type=\"text\" name=\"opacity_"+layerParametized+"\"";
-						contentsCategories += "data-provide=\"slider\"";
-						contentsCategories += "data-slider-min=\"0\"";
-						contentsCategories += "data-slider-max=\"1\"";
-						contentsCategories += "data-slider-step=\"0.1\"";
-						contentsCategories += "data-slider-value=\"1\"";
-						contentsCategories += "data-slider-tooltip=\"show\"";
-						contentsCategories += "<i class=\"fa fa-eye\"></i>";
-
-						contentsCategories += "</div>";
 					contentsCategories += "</div>";
-			        contentsCategories += "</div>";				            
+			        			            
 	    		});
-
+	    		contentsCategories += "</div>";	
 	    		contentsCategories += "</div>";
 
     		contentsCategories += "</div>";
 		    contentsCategories += "</div>";
-	        contentsCategories += "</div>";
+	        
     		
     	});
-
+		contentsCategories += "</div>";
     	contentsCategories += "</div>";
 
     	return contentsCategories;
@@ -232,7 +246,19 @@ function humanize(str) {
 	      .replace(/^[a-z]/, function(m) { return m.toUpperCase(); });
 }
 
+function parseMetadata(metadata)
+{
+	var m = "<ul>";
+
+	$.each(metadata, function(k,v){
+		m+="<li><b>"+k+"</b> "+v+"</li>";
+	});
+
+	m+= "</ul>"
+
+	return m;
+}
+
 L.control.LayersSidebar = function(innerHTML, options, layers) {
     return new L.Control.LayersSidebar(innerHTML, options, layers);
 }
-
